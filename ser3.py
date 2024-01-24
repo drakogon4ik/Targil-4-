@@ -1,12 +1,20 @@
 """
 Author: Oleg Shkolnik יא9.
-Description: Server that receive GET request from client (site) and send answer:
-             status of request (200 OK / 404 Not Found / 400 Bad Request / 302 Moved Temporarily
-                                       / 403 Forbidden / 500 Internal Server Error),
-             length of content,
-             type of content,
-             content.
-Date: 11/01/24
+Description: Server that receives GET or POST request from client (site) and sends answer:
+             for GET request with no parameters from user:
+                sends:
+                status of request (200 OK / 404 Not Found / 400 Bad Request / 302 Moved Temporarily
+                                                                  / 403 Forbidden / 500 Internal Server Error),
+                length of content,
+                type of content,
+                content.
+             for GET request with parameters from user:
+                finds name of the command and from this sends the answer (200 OK with number plus 1 /
+                                                                                with area /
+                                                                                with the photo).
+             for POST request:
+                sends status of request with filename that it sent, and it's length.
+Date: 24/01/24
 """
 
 import socket
@@ -228,8 +236,8 @@ def getting_path(url_string):
 
 def validating_param(url):
     """
-    function checks if function has parameters
-    :param url: string in which function searches "?" to check if i=it has parameters
+    function checks if function has parameters from user
+    :param url: string in which function searches "?" to check if it has parameters from user
     :return: true if function has parameters or false if not
     """
     return "?" in url
