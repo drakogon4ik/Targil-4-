@@ -20,14 +20,6 @@ Date: 24/01/24
 import socket
 import os
 
-error = 'NaN'
-HOST = '0.0.0.0'
-PORT = 80
-SITE_FOLDER = 'webroot'
-SPARE_URL = 'index.html'
-SOCKET_TIMEOUT = 2
-specific_urls = ['forbidden', 'moved', 'error']
-request_error = b"HTTP/1.1 400 Bad Request\r\n\r\n<h1>400 Bad Request</h1>"
 types = {
     'tml': 'text/html;charset=utf-8',
     'css': 'text/css',
@@ -39,6 +31,27 @@ types = {
     'png': 'image/jpeg',
     'peg': 'image/jpeg'
 }
+error = 'NaN'
+HOST = '0.0.0.0'
+PORT = 80
+SITE_FOLDER = 'webroot'
+SPARE_URL = 'index.html'
+SOCKET_TIMEOUT = 2
+specific_urls = ['forbidden', 'moved', 'error']
+bad_req = '400 Bad Request'
+
+
+def creating_headers(phrase):
+    """
+    function gets string with text that will be sent in the response, and makes headers with txt type and string's length
+    :param phrase: string with text that will be sent in the response
+    :return: headers with txt type and string's length
+    """
+    return f'Content-Type: {types["txt"]}\nContent-Length: {len(phrase)}'
+
+
+heads = creating_headers(bad_req)
+request_error = f'HTTP/1.1 400 Bad Request\r\n{heads}\r\n\r\n<h1>{bad_req}</h1>'.encode()
 
 
 def choosing_type(filename):
@@ -68,11 +81,15 @@ def searching_url(filename):
     """
     response = b''
     if filename == 'forbidden':
-        response = b"HTTP/1.1 403 Forbidden\r\n\r\n<h1>403 Forbidden</h1>"
+        phrase = '403 Forbidden'
+        headers = creating_headers(phrase)
+        response = f'HTTP/1.1 403 Forbidden\r\n{headers}\r\n\r\n{phrase}'.encode()
     elif filename == 'moved':
         response = b"HTTP/1.1 302 Moved Temporarily\r\nLocation: " + bytes(SPARE_URL, 'utf-8') + b"\r\n\r\n"
     elif filename == 'error':
-        response = b"HTTP/1.1 500 Internal Server Error\r\n\r\n<h1>500 Internal Server Error</h1>"
+        phrase = '500 Internal Server Error'
+        headers = creating_headers(phrase)
+        response = f'HTTP/1.1 500 Internal Server Error\r\n{headers}\r\n\r\n{phrase}'.encode()
     return response
 
 
@@ -125,13 +142,13 @@ def serve_file(filename):
         with open(filename, 'rb') as file:
             content = file.read()
             content_type = choosing_type(filename)
-            headers = f"Content-Type: {content_type}\nContent-Length: {len(content)}\r\n\r\n".encode()
-            response = b"HTTP/1.1 200 OK\r\n" + headers + content
+            headers = f'Content-Type: {content_type}\nContent-Length: {len(content)}'
+            response = f'HTTP/1.1 200 OK\r\n{headers}\r\n\r\n'.encode() + content
     except FileNotFoundError:
         with open(r'webroot\imgs\error.jpg', 'rb') as file:
             content = file.read()
-            headers = f"Content-Type: {types['jpg']}\nContent-Length: {len(content)}\r\n\r\n".encode()
-            response = b"HTTP/1.1 404 Not Found\r\n" + headers + content
+            headers = f'Content-Type: {types["jpg"]}\nContent-Length: {len(content)}'
+            response = f'HTTP/1.1 404 Not Found\r\n{headers}\r\n\r\n'.encode() + content
     return response
 
 
@@ -252,18 +269,18 @@ def definition(url):
     response = b''
     if 'calculate-next' in url:
         next_num = step_over(url)
-        headers = f"Content-Type: {types['txt']}\nContent-Length: {len(next_num)}"
+        headers = creating_headers(next_num)
         response = f'HTTP/1.1 200 OK\r\n{headers}\r\n\r\n{next_num}'.encode()
     elif 'calculate-area' in url:
         area = calculating_area(url)
-        headers = f"Content-Type: {types['txt']}\nContent-Length: {len(area)}"
+        headers = creating_headers(area)
         response = f'HTTP/1.1 200 OK\r\n{headers}\r\n\r\n{area}'.encode()
     elif 'image' in url:
         filename = getting_path(url)
         if filename[-3:] in types:
             response = serve_file(filename)
         else:
-            headers = f"Content-Type: {types['txt']}\nContent-Length: {len(error)}"
+            headers = creating_headers(error)
             response = f'HTTP/1.1 404 Not Found\r\n{headers}\r\n\r\n{error}'.encode()
     return response
 
