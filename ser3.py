@@ -185,7 +185,8 @@ def step_over(request):
 
         params = url_parts[1].split('=')
         try:
-            last_number += int(params[1]) + 1
+
+            last_number += int(float(params[1])) + 1
             return str(last_number)
         except ValueError:
             return "NaN"
@@ -220,6 +221,8 @@ def calculating_area(request):
         try:
 
             area = (int(height) * int(width)) / 2
+            if area // 1 == area:
+                return str(int(area))
             return str(area)
         except ValueError:
             return "NaN"
