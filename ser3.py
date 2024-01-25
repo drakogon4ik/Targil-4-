@@ -220,7 +220,7 @@ def calculating_area(request):
 
         try:
 
-            area = (int(height) * int(width)) / 2
+            area = (int(float(height)) * int(float(width))) / 2
             if area // 1 == area:
                 return str(int(area))
             return str(area)
